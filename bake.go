@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -24,7 +24,8 @@ func main() {
 
 	switch flag.Arg(0) {
 	case "":
-		Err("ARGERR", flag.ErrHelp, 1)
+		flag.Usage()
+		Err("ARGERR", nil, 1)
 		break
 	case "-":
 		fmt.Println("stdin")
@@ -32,15 +33,15 @@ func main() {
 		break
 
 	default: // Try to run jobs
-		fmt.Printf("Try: %v\n", strings.Join( flag.Args(),";"))
+		fmt.Printf("Try: %v\n", strings.Join(flag.Args(), ";"))
 		cwd := Workdir()
 		fmt.Printf("CWD: %s\n", cwd)
 		sources := Enumerate(cwd)
-		fmt.Printf("Files: \n\t%s\n", strings.Join( sources,"\n\t"))
+		fmt.Printf("Files: \n\t%s\n", strings.Join(sources, "\n\t"))
 		makefile := Compile(sources)
 		tempfile := WriteTemp(makefile)
 		// defer RemoveFile(tempfile)
-		RunMake(tempfile,  flag.Args())
+		RunMake(tempfile, flag.Args())
 		os.Exit(0)
 		break
 	}
@@ -53,8 +54,8 @@ func Enumerate(path string) (list []string) {
 
 	list = append(list, ReadDirOrFail(os.Getenv("HOME"))...)
 	bakepath := os.Getenv("BAKEPATH")
-	
-	if bakepath == "" { 
+
+	if bakepath == "" {
 		return list
 	}
 
@@ -130,10 +131,10 @@ func WriteTemp(src string) string {
 func RunMake(file string, jobs []string) []byte {
 	args := append([]string{"-f", file}, jobs...)
 
-	fmt.Printf("command is::\n%s %s\n", "/usr/bin/make", strings.Join(args," "))
+	fmt.Printf("command is::\n%s %s\n", "/usr/bin/make", strings.Join(args, " "))
 
-	out, err  := exec.Command ("/usr/bin/make", args...).Output()
-	if err!=nil {
+	out, err := exec.Command("/usr/bin/make", args...).Output()
+	if err != nil {
 		fmt.Printf("output is::\n%s\n", out)
 		Err("EXECERR", err, 1)
 	}
@@ -160,7 +161,7 @@ func Workdir() string {
 }
 
 func RemoveFile(file string) {
-	if err:=os.Remove(file); err != nil {
-		Err("RMERR",err,1)
+	if err := os.Remove(file); err != nil {
+		Err("RMERR", err, 1)
 	}
 }
